@@ -2774,17 +2774,17 @@ function getAnswer(messages) {
         .build();
 
     try {
-        log("[HTTP] 正在发送原生 OkHttp 请求...");
+        toastLog("[HTTP] 正在发送原生 OkHttp 请求...");
         var response = client.newCall(request).execute(); // 同步执行
 
-        log("[HTTP] Status: " + response.code());
+        toastLog("[HTTP] Status: " + response.code());
         var responseBodyStr = response.body().string();
 
         if (response.code() === 200) {
-            log("[HTTP] Success: " + responseBodyStr);
+            toastLog("[HTTP] Success: " + responseBodyStr);
             return responseBodyStr
         } else {
-            log("[HTTP] Error: " + responseBodyStr);
+            toastLog("[HTTP] Error: " + responseBodyStr);
         }
         response.close(); // ⚠️ 务必关闭释放资源
     } catch (e) {
@@ -2947,7 +2947,7 @@ while (1) {
         else {
             let answerJson = getAnswer(src)
             if (answerJson == "") {
-                log("timeout")
+                toastLog("timeout")
 
                 back()
                 sleep(1000)
