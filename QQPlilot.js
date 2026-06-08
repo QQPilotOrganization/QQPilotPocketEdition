@@ -10,6 +10,39 @@ if (!requestScreenCapture()) {
 }
 const IdentificationString = "⨋";
 importPackage(Packages["okhttp3"]);
+
+function getImagesBase64(max) {
+
+
+    let collections1 = desc("图片").find()
+    let collections2 = desc("表情[动画表情]").find()
+    for (let f of collections2) {
+        collections1.push(f)
+    }
+    let result=[]
+    for (let d of collections1) {
+        try {
+            let rect = d.bounds()
+            log(d.bounds())
+            let i = images.captureScreen();
+            let clipped = images.clip(i, rect.left, rect.top, rect.width(), rect.height())
+            let base64 = images.toBase64(clipped)
+            // log(base64)
+            result.push(base64);
+            max--;
+            if(max<=0)
+            {
+                break;
+            }
+        } catch (e) {
+            continue
+        }
+
+    }
+    return result
+
+}
+
 let dataset = {
     "aaaa": "aaaa",
     "如何集中精力做一件事情": "首当其冲的肯定是选择一个合适的地方啦，比如说图书馆之类的，如果你不想出去，那就找一个安静的地方吧。然后扔掉手机这类会让你分心的东西，或者关掉通知，确保你不会突然被打扰。明确你要做的事情，把它细化成分几步去完成，设置期限，任务完成之后放松放松。如果你感觉到累了不行了就去外面转转吧，喝一杯咖啡，思考让你停下来的地方，然后活力满满地继续接下来的工作。",
@@ -2721,6 +2754,8 @@ var CONFIG = {
     apiKey: "abcd",
     timeout: 120000,
     maxTokens: 2048,
+    withImage:true,
+    imageCount:1,
     sysPrompt: `你正在与多位用户同时交互，每位用户的输入格式为「用户名: 消息内容」（例如：UserName: 今天好累啊）。请严格遵循以下规则：
 	
 	1. **忽略用户名前缀**：仅解析冒号（:）之后的内容作为用户实际输入。
@@ -2738,12 +2773,13 @@ var CONFIG = {
     modeEnum: ["builtin", "mnn", "other"]
 };
 
-
-if (files.create(CONFIGNAME)) {
-    files.write(CONFIGNAME, JSON.stringify(CONFIG))
-}
-else {
+try {
     CONFIG = JSON.parse(files.read(CONFIGNAME))
+
+}
+catch (e) {
+    files.write(CONFIGNAME, JSON.stringify(CONFIG))
+
 }
 log(CONFIG)
 
@@ -2753,8 +2789,53 @@ var client = new OkHttpClient.Builder()
     .readTimeout(CONFIG.timeout, java.util.concurrent.TimeUnit.MILLISECONDS)
     .writeTimeout(CONFIG.timeout, java.util.concurrent.TimeUnit.MILLISECONDS)
     .build();
-function getAnswer(messages) {
 
+
+function getAnswer(messages) {
+    // === 处理图片（如果启用）===
+    if (CONFIG.withImage) {
+        let imagesBase64 = getImagesBase64(CONFIG.imageCount);
+        // log(imagesBase64)
+        if (imagesBase64 && imagesBase64.length > 0) {
+            // 创建新的 messages：将第一张图插入到第一条消息的 content 开头（或根据需求调整位置）
+            // 注意：OpenAI 格式要求 content 是数组，每个元素是 { type: "text" | "image_url", ... }
+            let newMessages = [];
+            for (let i = 0; i < messages.length; i++) {
+                let msg = messages[i];
+                if (i === 0) { // 只在第一条消息前加图（可自定义策略）
+                    let contentArray = [];
+                    // 添加所有图片
+                    for (let img of imagesBase64) {
+                        contentArray.push({
+                            type: "image_url",
+                            image_url: {
+                                url: img // 如 "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAA..."
+                            }
+                        });
+                    }
+                    // 添加原始文本内容（如果存在）
+                    if (msg.content && typeof msg.content === "string") {
+                        contentArray.push({
+                            type: "text",
+                            text: msg.content
+                        });
+                    } else if (Array.isArray(msg.content)) {
+                        // 如果原 content 已是数组，合并进去
+                        contentArray = contentArray.concat(msg.content);
+                    }
+                    newMessages.push({
+                        role: msg.role,
+                        content: contentArray
+                    });
+                } else {
+                    newMessages.push(msg);
+                }
+            }
+            messages = newMessages;
+        }
+    }
+
+    // === 构建 JSON 请求体 ===
     var jsonBody = JSON.stringify({
         model: CONFIG.modelName,
         messages: messages,
@@ -2762,9 +2843,10 @@ function getAnswer(messages) {
         temperature: 0.7,
         stream: false
     });
-
-    // 使用原生 OkHttp3 MediaType 和 RequestBody
+    toastLog(jsonBody)
+    // === 发送 HTTP 请求 ===
     var MediaType_JSON = Packages.okhttp3.MediaType.parse("application/json; charset=utf-8");
+    
     var requestBody = Packages.okhttp3.RequestBody.create(MediaType_JSON, jsonBody);
 
     var request = new Packages.okhttp3.Request.Builder()
@@ -2782,15 +2864,20 @@ function getAnswer(messages) {
 
         if (response.code() === 200) {
             toastLog("[HTTP] Success: " + responseBodyStr);
-            return responseBodyStr
+            return responseBodyStr;
         } else {
             toastLog("[HTTP] Error: " + responseBodyStr);
+            return "";
         }
-        response.close(); // ⚠️ 务必关闭释放资源
     } catch (e) {
-        return ""
+        toastLog("[ERROR] 请求异常: " + e);
+        return "";
+    } finally {
+        // 确保响应关闭（即使抛异常也尝试关闭）
+        if (typeof response !== 'undefined' && response && response.body()) {
+            response.body().close();
+        }
     }
-    return ""
 }
 
 // --- 执行 ---

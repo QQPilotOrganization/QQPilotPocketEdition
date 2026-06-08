@@ -7,6 +7,8 @@ var CONFIG = {
     apiKey: "abcd",
     timeout: 120000,
     maxTokens: 2048,
+    withImage: false,
+    imageCount: 1,
     sysPrompt: `你正在与多位用户同时交互，每位用户的输入格式为「用户名: 消息内容」（例如：UserName: 今天好累啊）。请严格遵循以下规则：
 	
 	1. **忽略用户名前缀**：仅解析冒号（:）之后的内容作为用户实际输入。
@@ -23,24 +25,25 @@ var CONFIG = {
     mode: "mnn",
     modeEnum: ["builtin", "mnn", "other"]
 };
-if (files.create(CONFIGNAME)) {
-    files.write(CONFIGNAME, JSON.stringify(CONFIG))
-}
-else {
-    CONFIG = JSON.parse(files.read(CONFIGNAME))
-}
 
+try {
+    CONFIG = JSON.parse(files.read(CONFIGNAME))
+
+}
+catch (e) {
+    files.write(CONFIGNAME, JSON.stringify(CONFIG))
+
+}
 ui.layout(
     <vertical>
         <text></text>
         <horizontal padding="8">
-            <text id="Title" w="auto" textSize="40sp">
+            <text id="Title" w="auto" textSize="20sp">
                 QQPilot设置
             </text>
 
         </horizontal>
         <button id="save">保存</button>
-        {/* <button padding="2" >保存</button> */}
         <text></text>
         <text w="auto" textSize="20sp" padding="2" >
             模型
@@ -67,11 +70,19 @@ ui.layout(
             APIKEY
         </text>
         <input id="apikey" text="" inputType="textPassword" />
+        <horizontal padding="16">
+            <Switch id="withImage" />
+            <text>图片模型</text>
+        </horizontal>
+        <text>解析图片数</text>
+
+        <seekbar id="imageCount" max="3" />
 
         <text id="s" w="auto" textSize="20sp" padding="2" >
             滑动次数
         </text>
         <seekbar id="scrollTries" max="10" />
+
         <text id="s" w="auto" textSize="20sp" padding="2" >
             系统提示词
         </text>
@@ -89,11 +100,16 @@ if (CONFIG.mode === "builtin") {
 if (CONFIG.mode === "other") {
     ui.rb3.checked = true;
 }
+
+
+
 ui.modelName.setText(CONFIG.modelName)
 ui.httpUrl.setText(CONFIG.httpUrl)
 ui.apikey.setText(CONFIG.apiKey)
 ui.system2.setText(CONFIG.sysPrompt)
 ui.scrollTries.progress = CONFIG.scrollTries || 3;
+ui.withImage.checked = CONFIG.withImage;
+ui.imageCount.progress = (CONFIG.imageCount || 1) - 1
 ui.save.on("click", function () {
     // 1. 获取并更新模式 (mode)
     if (ui.rb1.checked) {
@@ -103,15 +119,16 @@ ui.save.on("click", function () {
     } else if (ui.rb3.checked) {
         CONFIG.mode = "other";
     }
+    CONFIG.withImage = ui.withImage.checked
 
     // 2. 获取文本输入框的值
     CONFIG.modelName = ui.modelName.getText().toString();
     CONFIG.httpUrl = ui.httpUrl.getText().toString();
     CONFIG.apiKey = ui.apikey.getText().toString();
     CONFIG.sysPrompt = ui.system2.getText().toString();
-
     // 3. 获取 SeekBar 的进度值作为滑动次数
     CONFIG.scrollTries = ui.scrollTries.getProgress();
+    CONFIG.imageCount = ui.imageCount.progress + 1;
 
     // 4. 将更新后的 CONFIG 写入文件
     try {
