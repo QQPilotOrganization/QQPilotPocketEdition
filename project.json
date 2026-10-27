@@ -4,7 +4,7 @@
     "ignore": [
         "build"
     ],
-    "packageName": "com.example",
-    "versionName": "1.0.0",
+    "packageName": "com.qqpilot",
+    "versionName": "1.0.5",
     "versionCode": 1
 }
