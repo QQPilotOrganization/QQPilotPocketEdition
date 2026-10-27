@@ -1,6 +1,10 @@
+<div align="center">
+<img src="assets/qqpilotPE.png" width=200 />
+
+
 # QQPilot Pocket Edition
 
-![QQPilot Pocket Edition](assets/qqpilotPE.png)
+</div>
 
 ---
 
