@@ -33,9 +33,13 @@ var CONFIG = {
 };
 
 try {
-    CONFIG = JSON.parse(files.read(CONFIGNAME))
-    
-
+    let saved = JSON.parse(files.read(CONFIGNAME))
+    // 与默认值合并，兼容旧版本缺少字段的配置文件
+    for (let key in saved) {
+        if (saved.hasOwnProperty(key)) {
+            CONFIG[key] = saved[key]
+        }
+    }
 }
 catch (e) {
     files.write(CONFIGNAME, JSON.stringify(CONFIG))
@@ -43,72 +47,73 @@ catch (e) {
 }
 ui.layout(
     <vertical>
-        <text></text>
-        <horizontal padding="8">
-            <text id="Title" w="auto" textSize="20sp">
+        <horizontal padding="8" gravity="center_vertical">
+            <text id="Title" layout_weight="1" textSize="20sp">
                 QQPilot设置
             </text>
-
+            <button id="save" w="auto">保存</button>
         </horizontal>
-        <button id="save">保存</button>
-        <text></text>
-        <text w="auto" textSize="20sp" padding="2" >
-            模型
-        </text>
-        <horizontal padding="16">
-            <radiogroup id="rg">
-                <radio id="rb1" text="mnn" />
-                <radio id="rb2" text="内置模型" />
-                <radio id="rb3" text="其他" />
-            </radiogroup>
-        </horizontal>
-        <text id="modelname" w="auto" textSize="20sp" padding="2" >
-            模型名称
-        </text>
-        <text padding="2">mnn模式下会自动选择模型</text>
-        <input id="modelName" text="" padding="2" />
-        <text id="s" w="auto" textSize="20sp" padding="2" >
-            服务器地址
-        </text>
-        <text padding="2">只在模型=其他才有效</text>
+        <scroll layout_weight="1">
+            <vertical padding="8">
+                <text w="auto" textSize="20sp" padding="2">
+                    模型
+                </text>
+                <horizontal padding="16">
+                    <radiogroup id="rg">
+                        <radio id="rb1" text="mnn" />
+                        <radio id="rb2" text="内置模型" />
+                        <radio id="rb3" text="其他" />
+                    </radiogroup>
+                </horizontal>
+                <text id="modelname" w="auto" textSize="20sp" padding="2">
+                    模型名称
+                </text>
+                <text padding="2">mnn模式下会自动选择模型</text>
+                <input id="modelName" text="" padding="2" />
+                <text id="httpUrlLabel" w="auto" textSize="20sp" padding="2">
+                    服务器地址
+                </text>
+                <text padding="2">只在模型=其他才有效</text>
 
-        <input id="httpUrl" text="" padding="2" />
-        <text id="s" w="auto" textSize="20sp" padding="2" >
-            APIKEY
-        </text>
-        <input id="apikey" text="" inputType="textPassword" />
-        <horizontal padding="16">
-            <Switch id="withImage" />
-            <text>图片模型</text>
-        </horizontal>
-        <text>解析图片数</text>
+                <input id="httpUrl" text="" padding="2" />
+                <text id="apiKeyLabel" w="auto" textSize="20sp" padding="2">
+                    APIKEY
+                </text>
+                <input id="apikey" text="" inputType="textPassword" />
+                <horizontal padding="16">
+                    <Switch id="withImage" />
+                    <text>图片模型</text>
+                </horizontal>
+                <text>解析图片数</text>
 
-        <seekbar id="imageCount" max="3" />
+                <seekbar id="imageCount" max="3" />
 
-        <text id="s" w="auto" textSize="20sp" padding="2" >
-            滑动次数
-        </text>
-        <seekbar id="scrollTries" max="10" />
-
-
-
-        <text id="s" w="auto" textSize="20sp" padding="2" >
-            发完消息后等待
-        </text>
-        <input id="sleep" text="" padding="2" />
-        <text id="s" w="auto" textSize="20sp" padding="2" >
-            最大输出字数
-        </text>
-        <input id="maxOutput" text="" padding="2" />
+                <text id="scrollTriesLabel" w="auto" textSize="20sp" padding="2">
+                    滑动次数
+                </text>
+                <seekbar id="scrollTries" max="10" />
 
 
 
-        <text id="s" w="auto" textSize="20sp" padding="2" >
-            系统提示词
-        </text>
-        <input id="system2" text="" />
+                <text id="sleepLabel" w="auto" textSize="20sp" padding="2">
+                    发完消息后等待（秒）
+                </text>
+                <input id="sleep" text="" inputType="number" padding="2" />
+                <text id="maxOutputLabel" w="auto" textSize="20sp" padding="2">
+                    最大输出字数
+                </text>
+                <input id="maxOutput" text="" inputType="number" padding="2" />
 
 
+
+                <text id="sysPromptLabel" w="auto" textSize="20sp" padding="2">
+                    系统提示词
+                </text>
+                <input id="system2" text="" lines="8" gravity="top" padding="8" />
+
+
+            </vertical>
+        </scroll>
     </vertical>
 
 )
@@ -152,6 +157,8 @@ ui.save.on("click", function () {
     // 3. 获取 SeekBar 的进度值作为滑动次数
     CONFIG.scrollTries = ui.scrollTries.getProgress();
     CONFIG.imageCount = ui.imageCount.progress + 1;
+    CONFIG.sleep = parseInt(ui.sleep.getText().toString()) || 20;
+    CONFIG.max_output = parseInt(ui.maxOutput.getText().toString()) || 500;
 
     // 4. 将更新后的 CONFIG 写入文件
     try {

@@ -2725,10 +2725,12 @@ function bigramJaccard(s1, s2) {
     return intersection / (set1.size + set2.size - intersection);
 }
 
+const BUILTIN_FALLBACK = "喵？这个问题我还没学会，主人换个说法试试吧～"
+
 function answerJaccard(dataset, question) {
 
     let bestMatch = "";
-    let maxSimilarity = -1.0;
+    let maxSimilarity = 0;
 
     for (let key in dataset) {
         // log(key)
@@ -2738,7 +2740,10 @@ function answerJaccard(dataset, question) {
             bestMatch = key;
         }
     }
-    log("bestMatch", bestMatch)
+    log("bestMatch", bestMatch, maxSimilarity)
+    if (!bestMatch) {
+        return BUILTIN_FALLBACK
+    }
     const result = dataset[bestMatch];
     log(result);
     return result;
@@ -2779,8 +2784,13 @@ var CONFIG = {
     modeEnum: ["builtin", "mnn", "other"]
 };
 try {
-    CONFIG = JSON.parse(files.read(CONFIGNAME))
-
+    let saved = JSON.parse(files.read(CONFIGNAME))
+    // 与默认值合并，兼容旧版本缺少字段的配置文件
+    for (let key in saved) {
+        if (saved.hasOwnProperty(key)) {
+            CONFIG[key] = saved[key]
+        }
+    }
 }
 catch (e) {
     files.write(CONFIGNAME, JSON.stringify(CONFIG))
@@ -2844,7 +2854,7 @@ function getAnswer(messages) {
     var jsonBody = JSON.stringify({
         model: CONFIG.modelName,
         messages: messages,
-        max_tokens: 64,
+        max_tokens: CONFIG.maxTokens || 2048,
         temperature: 0.7,
         stream: false
     });
@@ -2886,12 +2896,16 @@ function getAnswer(messages) {
 }
 
 // --- 执行 ---
-let modelNameLower = CONFIG.modelName.toLowerCase()
-if (modelNameLower = "mnn") {
-    let models = http.get("http://localhost:8080/v1/models").body.string()
-    log("http://localhost:8080/v1/models", models);
-    models = JSON.parse(models).data[0].id
-    CONFIG.modelName = models
+// 注意：这里必须判断 CONFIG.mode，而不是模型名称
+if (CONFIG.mode === "mnn") {
+    try {
+        let models = http.get("http://localhost:8080/v1/models").body.string()
+        log("http://localhost:8080/v1/models", models);
+        models = JSON.parse(models).data[0].id
+        CONFIG.modelName = models
+    } catch (e) {
+        toastLog("自动获取 MNN 模型失败，继续使用配置中的模型名: " + e)
+    }
 }
 
 function getRequestsString(contents) {
@@ -3032,8 +3046,21 @@ while (1) {
     print(src)
     try {
         let answer = ""
-        if (modelNameLower == "builtin") {
-            let question = contents[contents.length - 1].content
+        if (CONFIG.mode === "builtin") {
+            // 取最后一条对方消息，避免把自己的回复当成问题
+            let question = ""
+            for (let i = contents.length - 1; i >= 0; i--) {
+                if (!contents[i].ownByMyself) {
+                    question = contents[i].content
+                    break
+                }
+            }
+            if (!question) {
+                toastLog("未解析到对方消息")
+                back()
+                sleep(1000)
+                continue
+            }
             answer = answerJaccard(dataset, question)
         }
         else {
@@ -3048,6 +3075,13 @@ while (1) {
             answerJson = JSON.parse(answerJson)
             answer = answerJson.choices[0].message.content
 
+        }
+
+        if (!answer) {
+            toastLog("没有生成回复")
+            back()
+            sleep(1000)
+            continue
         }
 
         answer=answer.slice(0,CONFIG.max_output)
