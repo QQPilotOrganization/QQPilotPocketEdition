@@ -2,10 +2,10 @@ auto.waitFor()
 const CONFIGNAME = "/storage/emulated/0/Download/qqpilotconfig.json"
 let Pname = getPackageName("QQ");
 if (Pname == null) {
-    toast("未找到QQ")
+    toastLog("未找到QQ")
 }
 if (!requestScreenCapture()) {
-    toast("请求截图失败");
+    toastLog("请求截图失败");
     exit();
 }
 const IdentificationString = "⨋";
