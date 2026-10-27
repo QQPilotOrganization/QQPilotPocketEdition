@@ -2724,9 +2724,6 @@ function bigramJaccard(s1, s2) {
     }
     return intersection / (set1.size + set2.size - intersection);
 }
-
-const BUILTIN_FALLBACK = "喵？这个问题我还没学会，主人换个说法试试吧～"
-
 function answerJaccard(dataset, question) {
 
     let bestMatch = "";
@@ -2741,9 +2738,6 @@ function answerJaccard(dataset, question) {
         }
     }
     log("bestMatch", bestMatch, maxSimilarity)
-    if (!bestMatch) {
-        return BUILTIN_FALLBACK
-    }
     const result = dataset[bestMatch];
     log(result);
     return result;
