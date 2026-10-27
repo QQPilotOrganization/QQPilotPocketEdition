@@ -18,6 +18,9 @@ QQPilot Pocket Edition（QQPilotPE）是一款运行在 Android 上的全自动 
 - **无需修改 QQ 客户端**，**无需 Root 权限**。
 - 自动化操作仍存在账号风险，建议使用小号测试，并妥善保管 API Key。
 
+> [!IMPORTANT]
+> QQPilotPE可能会申请**root**权限，**可以直接拒绝**。不影响正常使用。
+
 ### 🚫 当前限制
 
 - 运行时**独占手机前台**，请保持 QQ 在最前方并关闭锁屏。
@@ -37,12 +40,13 @@ QQPilot Pocket Edition（QQPilotPE）是一款运行在 Android 上的全自动 
 使用本地模型时，请根据模型大小额外预留内存与存储空间。
 
 ---
+---
 
 ## 🛠️ 安装与配置
 
 ### 1. QQ 客户端设置（必须）
 
-为保证视觉识别与控件解析的准确率，请按以下要求配置 QQ：
+为保证视觉识别与控件解析的准确率，**请按以下要求配置 QQ**：
 
 - **模式选择**：简洁模式
 - **主题色**：极简白
@@ -50,39 +54,11 @@ QQPilot Pocket Edition（QQPilotPE）是一款运行在 Android 上的全自动 
 - **色彩滤镜**：保持关闭状态
 - 关闭会遮挡聊天界面的悬浮窗、红包助手等插件
 
-### 2. 选择回复方式
+### 2. 安装
 
-在 `QQPilot设置` 中选择一种模式：
-
-| 模式         | 说明                                                                 | 是否需要网络 |
-| :----------- | :------------------------------------------------------------------- | :----------- |
-| **mnn**      | 连接本机 MNN Chat 的 OpenAI 兼容服务，自动读取 `/v1/models` 中的模型 | 本机服务     |
-| **内置模型** | 使用脚本内置的离线问答数据集，零配置、零网络                         | 否           |
-| **其他**     | 连接任意 OpenAI 兼容 API（OpenAI、DeepSeek、Ollama、One API 等）     | 是           |
-
-> `mnn` 模式会自动请求 `http://localhost:8080/v1/models` 并选择第一个模型；如果服务未启动，会回退到设置中填写的模型名。
-
-#### 以 MNN Chat + Qwen3.5-2B-MNN 为例
-
-1. **下载模型**：在 MNN Chat 中下载 `Qwen3.5-2B-MNN`。
-   ![下载模型](tutorial/Screenshot_20260607-214755.jpg)
-
-2. **进入设置**：在“我的模型”选项卡中选择已下载的模型，点击左上角进入设置。
-   ![进入设置](tutorial/Screenshot_20260607-214907.jpg)
-
-3. **参数配置**：参照下图完成配置后，**务必重启模型服务**。
-   ![参数配置](tutorial/Screenshot_20260607-214945.jpg)
-
-4. 在 `QQPilot设置` 中选择 **mnn**，保存即可。
-
-#### 使用其他 OpenAI 兼容 API
-
-选择 **其他**，然后填写：
-
-- **模型名称**：例如 `deepseek-chat`、`gpt-4o-mini`、`qwen2.5:7b`
-- **服务器地址**：不带 `/chat/completions`，例如 `https://api.deepseek.com/v1`
-- **APIKEY**：对应服务的密钥（本地 Ollama 可随意填写）
-
+1. 确保手机已安装 QQ 客户端。
+2. 前往 [Releases](../../releases) 页面下载并安装 `QQPilot` 与 `QQPilot设置` APK。
+3. 打开 `QQPilot设置`，按需调整参数
 ### 3. 设置项说明
 
 打开 `QQPilot设置` 后，所有设置项都在可滚动页面中，右上角“保存”按钮始终可见。
@@ -108,16 +84,58 @@ QQPilot Pocket Edition（QQPilotPE）是一款运行在 Android 上的全自动 
 
 升级脚本后旧配置会自动合并默认值，不会因为缺少新字段而崩溃。
 
-### 4. 安装与启动
+#### 选择回复方式
 
-1. 确保手机已安装 QQ 客户端。
-2. 前往 [Releases](../../releases) 页面下载并安装 `QQPilot` 与 `QQPilot设置` APK。
-3. 打开 `QQPilot设置`，按需调整参数并保存。
+在 `QQPilot设置` 中选择一种模式：
+
+| 模式         | 说明                                                                 | 是否需要网络 |
+| :----------- | :------------------------------------------------------------------- | :----------- |
+| **mnn**      | 连接本机 MNN Chat 的 OpenAI 兼容服务，自动读取 `/v1/models` 中的模型 | 本机服务     |
+| **内置模型** | 使用脚本内置的离线问答数据集，零配置、零网络                         | 否           |
+| **其他**     | 连接任意 OpenAI 兼容 API（OpenAI、DeepSeek、Ollama、One API 等）     | 是           |
+
+> `mnn` 模式会自动请求 `http://localhost:8080/v1/models` 并选择第一个模型；如果服务未启动，会回退到设置中填写的模型名。
+
+<details> 
+
+<summary><b>模型的配置和选择</b></summary>
+
+#### 以 MNN Chat + Qwen3.5-2B-MNN 为例
+
+
+
+1. **下载模型**：在 MNN Chat 中下载 `Qwen3.5-2B-MNN`。
+   <img src="tutorial/Screenshot_20260607-214755.jpg" width=200 />
+
+2. **进入设置**：在“我的模型”选项卡中选择已下载的模型，点击左上角进入设置。
+   <img src="tutorial/Screenshot_20260607-214907.jpg " width=200 />
+
+3. **参数配置**：参照下图完成配置后，**务必重启模型服务**。
+   <img src="tutorial/Screenshot_20260607-214945.jpg" width="200" />
+
+4. 在 `QQPilot设置` 中选择 **mnn**，保存即可。
+
+#### 使用其他 OpenAI 兼容 API
+
+选择 **其他**，然后填写：
+
+- **模型名称**：例如 `deepseek-flash`、`qwen3.8:27b`
+- **服务器地址**：不带 `/chat/completions`，例如 `https://api.deepseek.com/v1`
+- **APIKEY**：对应服务的密钥（本地 Ollama 可随意填写）
+
+</details>
+
+
+### 最后
 4. 打开 `QQPilot` 主程序，授予**无障碍权限**与**截图权限**，点击“立即开始”。
 
-🎉 **配置完成！机器人将自动接管消息回复。**
+
+
+### 🎉 **配置完成！机器人将自动接管消息回复。**
 
 ---
+---
+
 
 ## 🧑‍💻 开发者指南
 
@@ -164,13 +182,11 @@ QQPilotPocketEdition/
 
 ## 🤝 贡献与反馈
 
-我们欢迎任何形式的贡献！
+欢迎任何形式的贡献。
 
 - 🐞 **发现 Bug** → 提交 [Issue](https://github.com/QQPilotOrganization/QQPilotPocketEdition/issues)
 - 💡 **功能改进** → 提交 Pull Request
 - 🌍 **语言/模型建议** → 欢迎在 Issue 中讨论
-
-> 让我们一起打造更安全、智能的视觉自动化工具！
 
 ---
 
