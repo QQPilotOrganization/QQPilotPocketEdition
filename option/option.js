@@ -29,7 +29,7 @@ var CONFIG = {
 **不要包含任何前缀、用户名标签或元信息**。
 使用[[NEXT]]可以换行。开启下一条消息。`,
     mode: "mnn",
-    modeEnum: ["builtin", "mnn", "other"]
+    modeEnum: [ "mnn", "other"]
 };
 
 try {
@@ -61,8 +61,7 @@ ui.layout(
                 <horizontal padding="16">
                     <radiogroup id="rg">
                         <radio id="rb1" text="mnn" />
-                        <radio id="rb2" text="内置模型" />
-                        <radio id="rb3" text="其他" />
+                        <radio id="rb2" text="其他" />
                     </radiogroup>
                 </horizontal>
                 <text id="modelname" w="auto" textSize="20sp" padding="2">
@@ -109,7 +108,7 @@ ui.layout(
                 <text id="sysPromptLabel" w="auto" textSize="20sp" padding="2">
                     系统提示词
                 </text>
-                <input id="system2" text="" lines="8" gravity="top" padding="8" />
+                <input id="system2" text="" lines="50" gravity="top" padding="8" inputType="textMultiLine" />
 
 
             </vertical>
@@ -119,9 +118,6 @@ ui.layout(
 )
 if (CONFIG.mode === "mnn") {
     ui.rb1.checked = true;
-}
-if (CONFIG.mode === "builtin") {
-    ui.rb2.checked = true;
 }
 if (CONFIG.mode === "other") {
     ui.rb3.checked = true;
@@ -143,8 +139,6 @@ ui.save.on("click", function () {
     if (ui.rb1.checked) {
         CONFIG.mode = "mnn";
     } else if (ui.rb2.checked) {
-        CONFIG.mode = "builtin";
-    } else if (ui.rb3.checked) {
         CONFIG.mode = "other";
     }
     CONFIG.withImage = ui.withImage.checked
