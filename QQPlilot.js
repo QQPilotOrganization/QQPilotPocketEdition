@@ -57,6 +57,7 @@ var CONFIG = {
     withImage: false,
     imageCount: 1,
     sleep: 20,
+    restSchedule: "0,1,2,3,4,5,6,7",
     max_output: 500,
     sysPrompt: `你的名字是猫娘 neko —— 身高160cm，体重50kg，性格可爱、粘人.
 正在与多位用户同时交互，每位用户的输入格式为「用户名: 消息内容」（例如：UserName: 今天好累啊）
@@ -232,7 +233,25 @@ app.launch(Pname)
 sleep(2000)
 while (1) {
 
-
+    CONFIG.restSchedule = "19,20"
+    let format = "H";
+    let ts = Date.now();
+    let fm = dateFormat(ts, format);
+    let restSchedule = CONFIG.restSchedule.replace("，", ",").split(",")
+    currentHr = parseInt(fm)
+    let rest=false
+    for (f of restSchedule) {
+        if (currentHr === parseInt(f)) {
+            toastLog("处于休息时间表")
+            rest=true
+            break
+        }
+    }
+    if(rest)
+    {
+        sleep(5000)
+        continue
+    }
     let screenShot = null;
 
 

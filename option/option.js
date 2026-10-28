@@ -11,6 +11,7 @@ var CONFIG = {
     imageCount: 1,
     sleep: 20,
     max_output: 500,
+    restSchedule:"0,1,2,3,4,5,6,7",
     sysPrompt: `你的名字是猫娘 neko —— 身高160cm，体重50kg，性格可爱、粘人.
 正在与多位用户同时交互，每位用户的输入格式为「用户名: 消息内容」（例如：UserName: 今天好累啊）
 
@@ -103,6 +104,12 @@ ui.layout(
                 </text>
                 <input id="maxOutput" text="" inputType="number" padding="2" />
 
+                <text id="restScheduleLabel" w="auto" textSize="20sp" padding="2">
+                    休息时间表:
+                </text>
+                <text padding="2">在设定时间内不工作,以本地时间小时为单位，用英文逗号分隔,例如:1,2,3,4,5</text>
+
+                <input id="restSchedule" text="" inputType="number" padding="2" />
 
 
                 <text id="sysPromptLabel" w="auto" textSize="20sp" padding="2">
@@ -134,6 +141,7 @@ ui.withImage.checked = CONFIG.withImage;
 ui.imageCount.progress = (CONFIG.imageCount || 1) - 1
 ui.maxOutput.setText(CONFIG.max_output.toString())
 ui.sleep.setText(CONFIG.sleep.toString())
+ui.restSchedule.setText(CONFIG.restSchedule.toString())
 ui.save.on("click", function () {
     // 1. 获取并更新模式 (mode)
     if (ui.rb1.checked) {
