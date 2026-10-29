@@ -52,7 +52,7 @@ var CONFIG = {
     modelName: "modelperm-ModelScope/MNN/Qwen3.5-2B-MNN",
     httpUrl: "http://localhost:8080/v1",
     apiKey: "abcd",
-    timeout: 120000,
+    timeout: 1200000,
     maxTokens: 2048,
     withImage: false,
     imageCount: 1,

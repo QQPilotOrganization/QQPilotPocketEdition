@@ -1,11 +1,12 @@
 "ui";
+
 const CONFIGNAME = "/storage/emulated/0/Download/qqpilotconfig.json"
 var CONFIG = {
     scrollTries: 3,
     modelName: "modelperm-ModelScope/MNN/Qwen3.5-2B-MNN",
     httpUrl: "http://localhost:8080/v1",
     apiKey: "abcd",
-    timeout: 120000,
+    timeout: 1200000,
     maxTokens: 2048,
     withImage: false,
     imageCount: 1,
@@ -104,6 +105,11 @@ ui.layout(
                 </text>
                 <input id="maxOutput" text="" inputType="number" padding="2" />
 
+                <text id="maxOutputLabel" w="auto" textSize="20sp" padding="2">
+                    远程服务器超时（ms）
+                </text>
+                <input id="remoteServerTimeout" text="" inputType="number" padding="2" />
+
                 <text id="restScheduleLabel" w="auto" textSize="20sp" padding="2">
                     休息时间表:
                 </text>
@@ -142,6 +148,7 @@ ui.imageCount.progress = (CONFIG.imageCount || 1) - 1
 ui.maxOutput.setText(CONFIG.max_output.toString())
 ui.sleep.setText(CONFIG.sleep.toString())
 ui.restSchedule.setText(CONFIG.restSchedule.toString())
+ui.remoteServerTimeout.setText(CONFIG.timeout.toString())
 ui.save.on("click", function () {
     // 1. 获取并更新模式 (mode)
     if (ui.rb1.checked) {
@@ -161,6 +168,8 @@ ui.save.on("click", function () {
     CONFIG.imageCount = ui.imageCount.progress + 1;
     CONFIG.sleep = parseInt(ui.sleep.getText().toString()) || 20;
     CONFIG.max_output = parseInt(ui.maxOutput.getText().toString()) || 500;
+    CONFIG.restSchedule=ui.restSchedule.getText().toString()
+    CONFIG.timeout=parseInt(ui.remoteServerTimeout.getText().toString()) || 1200000
 
     // 4. 将更新后的 CONFIG 写入文件
     try {
